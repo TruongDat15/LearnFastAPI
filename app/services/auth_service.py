@@ -2,7 +2,8 @@ import base64
 
 from sqlalchemy.orm import Session
 
-from app.crud.user import get_user_by_email
+from app.crud.user import create_user, get_user_by_email
+from app.models.user import User
 
 
 def _build_basic_token(user_id: int, email: str) -> str:
@@ -30,4 +31,26 @@ def login_user(db: Session, email: str, password: str):
             "id": user.id,
             "email": user.email,
         },
+    }
+
+
+def register_user(db: Session, email: str, password: str):
+    # B1: Kiểm tra email đã tồn tại chưa.
+    existed_user = get_user_by_email(db, email)
+    if existed_user:
+        return None
+
+    # B2: Tạo object user mới từ dữ liệu request.
+    # Lưu ý: Password hiện đang lưu plain text theo cấu trúc hiện tại.
+    new_user = User(email=email, password=password)
+
+    # B3: Lưu vào DB qua tầng CRUD để đồng nhất cách thao tác dữ liệu.
+    saved_user = create_user(db, new_user)
+
+    # B4: Trả dữ liệu đúng với schema RegisterResponse.
+    return {
+        "user": {
+            "id": saved_user.id,
+            "email": saved_user.email,
+        }
     }
