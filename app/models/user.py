@@ -6,3 +6,5 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(100))
     password = Column(String(100))
+    
+    alemtest = Column(String(100))
